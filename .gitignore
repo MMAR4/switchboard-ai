@@ -1,5 +1,18 @@
+# Virtual Environment
 venv/
+.venv/
+env/
+
+# Python Cache & Runtime Data
 __pycache__/
 *.pyc
-.vscode/
+.pytest_cache/
+
+# Local Mock Datasets & Database Files
 data/
+*.db
+*.parquet
+
+# IDE Settings
+.vscode/
+.idea/
