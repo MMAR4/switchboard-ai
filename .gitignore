@@ -9,6 +9,10 @@ data/
 *.parquet
 *.db
 
+# Environment variables & secrets
+.env
+.env.*
+
 # IDE & OS files
 .vscode/
 .idea/
