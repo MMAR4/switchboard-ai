@@ -1,18 +1,15 @@
-# Virtual Environment
+# Python virtual environments & bytecode
 venv/
 .venv/
-env/
-
-# Python Cache & Runtime Data
 __pycache__/
 *.pyc
-.pytest_cache/
 
-# Local Mock Datasets & Database Files
+# Local data files generated during testing
 data/
-*.db
 *.parquet
+*.db
 
-# IDE Settings
+# IDE & OS files
 .vscode/
 .idea/
+.DS_Store
