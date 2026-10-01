@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "switchboard_ai"
+version = "0.1.0"
+description = "A dynamic payload router for data engineering pipelines, routing between DuckDB and PySpark."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "boto3>=1.26.0",
+    "duckdb>=0.9.0",
+    "pandas>=1.5.0",
+]
+
+[project.optional-dependencies]
+spark = ["pyspark>=3.3.0"]
+test = ["pytest>=7.0.0", "pytest-mock>=3.10.0"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]

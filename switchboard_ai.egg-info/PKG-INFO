@@ -1,0 +1,79 @@
+Metadata-Version: 2.4
+Name: switchboard_ai
+Version: 0.1.0
+Summary: A dynamic payload router for data engineering pipelines, routing between DuckDB and PySpark.
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: boto3>=1.26.0
+Requires-Dist: duckdb>=0.9.0
+Requires-Dist: pandas>=1.5.0
+Provides-Extra: spark
+Requires-Dist: pyspark>=3.3.0; extra == "spark"
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: pytest-mock>=3.10.0; extra == "test"
+
+# Switchboard AI
+
+A lightweight, production-grade Python library that acts as a dynamic payload router for ETL workloads. 
+It analyzes the size of an S3 input path and intelligently routes the execution of a SQL transformation query to either:
+- **DuckDB**: For fast, in-memory processing of small payloads (<100MB by default).
+- **PySpark**: For distributed, memory-safe processing of large, multi-GB datasets.
+
+## Installation
+
+Install via pip:
+
+```bash
+pip install switchboard_ai
+```
+
+To include PySpark for the distributed execution branch:
+
+```bash
+pip install "switchboard_ai[spark]"
+```
+
+## Usage
+
+### Local Python Script
+
+```python
+import logging
+from switchboard.engine import SwitchboardEngine
+
+logging.basicConfig(level=logging.INFO)
+
+input_path = "s3://my-bucket/incoming/data/*.json"
+output_path = "s3://my-bucket/processed/data_clean/"
+sql_query = "SELECT id, name, UPPER(status) as status FROM read_json_auto('s3://my-bucket/incoming/data/*.json')"
+
+# Using context manager for automatic cleanup
+with SwitchboardEngine(threshold_mb=100.0, max_duckdb_memory="4GB") as engine:
+    # If the payload size is <= 100MB, it will execute in DuckDB.
+    # Otherwise, it will fallback to PySpark.
+    
+    # Write directly to S3
+    engine.execute(input_path, sql_query, s3_output_path=output_path)
+    
+    # Or return an in-memory DataFrame (Pandas from DuckDB or PySpark DataFrame from Spark)
+    # df = engine.execute(input_path, sql_query)
+    # print(df)
+```
+
+### Databricks Integration
+
+In Databricks, PySpark is pre-installed. `SwitchboardEngine` is designed to be zero-config by picking up the active `SparkSession`.
+
+```python
+from switchboard.engine import SwitchboardEngine
+
+input_path = "s3://my-data-lake/bronze/transactions/"
+sql_query = "SELECT * FROM parquet.`s3://my-data-lake/bronze/transactions/` WHERE amount > 100"
+
+with SwitchboardEngine(threshold_mb=200.0) as engine:
+    df = engine.execute(input_path, sql_query)
+    display(df)
+```
+
+**Note for Databricks**: DuckDB will automatically attempt to use the instance profile (via IMDS) if standard AWS keys are not explicitly set in the environment variables, ensuring secure and seamless access to S3.
